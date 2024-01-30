@@ -15,9 +15,9 @@ encoded_input = tokenizer(text, return_tensors='pt')
 output = model(**encoded_input)
 ```
 
-For every model, we always need to load a tokenizer and a model. You can swap 'bert-base-uncased' with other checkpoints such as 'bert-base-chinese' or 'bert-large-uncased' for different use cases.
+For every model, we always need to load a tokenizer and a model. You can swap `'bert-base-uncased'` with other checkpoints such as `'bert-base-chinese'` or `'bert-large-uncased'` for different use cases.
 
-Another very useful thing that we should know is the input and output of the model. BERT input size is 512 but if you use the bert-large models, then the input size is 1024. As with all other NLP models, this input (encoded_input) has to be a number tensor instead of a string (text). There are 2 interesting outputs for this model:
+Another very useful thing that we should know is the input and output of the model. BERT input size is 512 but if you use the bert-large models, then the input size is 1024. As with all other NLP models, this input (`encoded_input`) has to be a number tensor instead of a string (`text`). There are 2 interesting outputs for this model:
   - 'last_hidden_state'
   - 'pooler_output'
 
