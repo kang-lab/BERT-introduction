@@ -27,7 +27,7 @@ After finding a good BERT model and checkpoints, your next step would be (1) def
 ## BERT classifier
 To create a BERT classifier, you can either choose a huggingface wrapper or create your own task-specific wrapper.
 
-There are many wrapper created by huggingface for a lot of use cases such as `BertForNextSentencePrediction`, `BertForSequenceClassification`, `BertForMultipleChoice`, and `BertFotQuestionAnswering`. You can check this huggingface docs for details on how to use a wrapper. They normally give an example with good explanation:
+There are many wrapper created by huggingface for a lot of use cases such as `BertForNextSentencePrediction`, `BertForSequenceClassification`, `BertForMultipleChoice`, and `BertForQuestionAnswering`. You can check this huggingface docs for details on how to use a wrapper. They normally give an example with good explanation:
     
 ```
 import torch
@@ -52,7 +52,7 @@ labels = torch.tensor([1])
 loss = model(**inputs, labels=labels).loss
 round(loss.item(), 2)
 ```
-  - Another approach is to make your own classifier function. I have 3 examples here ranging from very simple to more complex. The first example is a very simple classifier where I only pass the CLS token through a Linear layer after dropping 20% of the weights. The second example is from a multitask leaning experiment where I will swap out the last linear layer depends on the task. If the model was learning Task1, it would use the 1st linear layer and if it was learning Task2, the 2nd linear layer. This approach is very helpful when you want to make a model learn multiple tasks at the same time to increase external validity or generalizability. The last example is an experiment where I used 2 seperate learning models to read 2 different inputs and output a single decision probability after combining the output of the 2 models. Basically, you will have more flexibility when designing experiments with custom functions.
+  - Another approach is to make your own classifier function. I have 3 examples here ranging from very simple to more complex. The first example is a very simple classifier where I only pass the CLS token through a Linear layer after dropping 20% of the weights. The second example is from a multitask leaning experiment where I will swap out the last linear layer depends on the task. If the model was learning Task1, it would use the 1st linear layer and if it was learning Task2, the 2nd linear layer. This approach is very helpful when you want to make a model learn multiple tasks at the same time to increase external validity or generalizability. The last example is an experiment where I used 2 seperate learning models to read 2 different inputs and to return a single decision probability after combining the outputs of the 2 models. Basically, you will have more flexibility when designing experiments with a custom classifer but 95% of the time using the huggingface wrapper should be enough.
 
 ```
 class severity_classifier(nn.Module):
@@ -214,8 +214,16 @@ def train(model, train_dataloader, val_dataloader, Y_val, path):
 Huggingface also provides a lot of good example script for common use case such as [text classification](https://colab.research.google.com/github/huggingface/notebooks/blob/main/examples/text_classification.ipynb), [question answering](https://colab.research.google.com/github/huggingface/notebooks/blob/main/examples/question_answering.ipynb) or [multiple choice](https://colab.research.google.com/github/huggingface/notebooks/blob/main/examples/multiple_choice.ipynb). They also include a lot of good exaplanation in their articles so don't forget to check the [Resources section](https://huggingface.co/docs/transformers/model_doc/bert#resources)
 
 # Finetuning BERT
+Fine-tuning BERT is a process of adapting a pre-trained BERT model to a specific task. BERT is pre-trained on a large corpus of text to understand general language patterns. However, for specialized tasks (ie, medically related tasks), BERT often needs fine-tuning. Often, the research community offers a variety of well fine-tuned models so you won't have to finetune the pretrained model yourself. Especially when your specific corpus is small, fine-tuning won't affect the model performance much (or at all). However, just for the learning purposes, fine-tuning involves retraining an existing model at a lower learning rate and then saving the updated weights for future application.
 
 # Beyond BERT
+Even though BERT is a good baseline model, nowadays there are several other LLMs known for their robust performance in specific group of tasks. Here are some notable examples:
+- GPT Series: Developed by OpenAI, these models, especially GPT-3 and its successor GPT-4, are widely recognized for their ability to generate coherent and contextually relevant text based on the input they receive.
+- RoBERTa: Built by Facebook AI, RoBERTa modifies BERT with changes in the pre-training procedure, which improves its performance across a range of natural language understanding tasks.
+- T5: Created by Google AI, this model frames all NLP tasks as a text-to-text conversion problem, simplifying the process of applying the model to a wide range of tasks.
+- BlueBERT: a domain-specific variant of the BERT model specifically pre-trained on biomedical and clinical text data. It is tailored for tasks in the biomedical and healthcare domains.
+
+Selecting an appropriate model among the many available options can be a challenging task. Typically, it involves thoroughly reviewing their research papers, examining their training datasets, and evaluating their performance metrics. Ideally, the chosen model’s training dataset should closely align with your experimental dataset to ensure strong performance. However, it's often necessary to experiment with multiple models to find the best fit. It is also important to pay attention to the input and output dimensions for practical implementation. Once you've selected a model, you can integrate it into your existing process, which includes loading the model from hugging face, creating a classifier, and establishing a training function; all discussed above.
 
 Other resources:
 1. [BERT 101 by huggingface](https://huggingface.co/blog/bert-101)
