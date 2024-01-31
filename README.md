@@ -18,8 +18,8 @@ output = model(**encoded_input)
 For every model, we always need to load a tokenizer and a model. You can swap `'bert-base-uncased'` with other checkpoints such as `'bert-base-chinese'` or `'bert-large-uncased'` for different use cases.
 
 Another very useful thing that we should know is the input and output of the model. BERT input size is 512 but if you use the bert-large models, then the input size is 1024. As with all other NLP models, this input (`encoded_input`) has to be a number tensor instead of a string (`text`). There are 2 interesting outputs for this model:
-  - `'last_hidden_state'` has a dimension of (batch x sequence dimension x encoding dimension). This contains the final embeddings of all tokens in the sentence and can be understood as the final representation of each word in a sentence. We can apply permutation methods, such as max, mean or sum, to aggregate the embeddings into a single sentence representation.
-  - `'pooler_output'` has a dimension of (batch x encoding dimension). This is the embedding of the `CLS` special token and is most commonly considered as a valid representation of the complete sentence. In fact the [BertForSequenceClassification wrapper](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/bert/modeling_bert.py#L1576) by huggingface use pooler_output to classify a sequence.
+  - `last_hidden_state` has a dimension of (batch x sequence dimension x encoding dimension). This contains the final embeddings of all tokens in the sentence and can be understood as the final representation of each word in a sentence. We can apply permutation methods, such as max, mean or sum, to aggregate the embeddings into a single sentence representation.
+  - `pooler_output` has a dimension of (batch x encoding dimension). This is the embedding of the `CLS` special token and is most commonly considered as a valid representation of the complete sentence. In fact the [BertForSequenceClassification wrapper](https://github.com/huggingface/transformers/blob/v4.37.2/src/transformers/models/bert/modeling_bert.py#L1576) by huggingface use the `pooler_output` to classify a sequence.
 
 # BERT next steps
 After finding a good BERT model and checkpoints, your next step would be (1) defining a classifer and (2) train the model
@@ -52,7 +52,8 @@ labels = torch.tensor([1])
 loss = model(**inputs, labels=labels).loss
 round(loss.item(), 2)
 ```
-  - Another approach is to make your own classifier function. I have 3 examples here ranging from very simple to more complex. The first example is a very simple classifier where I only pass the CLS token through a Linear layer after dropping 20% of the weights. The second example is from a multitask leaning experiment where I will swap out the last linear layer depends on the task. If the model was learning Task1, it would use the 1st linear layer and if it was learning Task2, the 2nd linear layer. This approach is very helpful when you want to make a model learn multiple tasks at the same time to increase external validity or generalizability. The last example is an experiment where I used 2 seperate learning models to read 2 different inputs and to return a single decision probability after combining the outputs of the 2 models. Basically, you will have more flexibility when designing experiments with a custom classifer but 95% of the time using the huggingface wrapper should be enough.
+
+  - Another approach is to make your own classifier function. Here, I have three examples, ranging from simple to more complex. The first is a straightforward classifier where I pass only the CLS token through a Linear layer, dropping 20% of the weights. The second example stems from a multitask learning experiment. In this approach, I swap out the last linear layer depending on the task at hand: the 1st linear layer for Task1, and the 2nd linear layer for Task2. This method is particularly useful when aiming to train a model on multiple tasks simultaneously, enhancing external validity or generalizability. The final example is a more intricate experiment where I called two separate learning models to process two different inputs and then combine their outputs to yield a single decision probability. Essentially, custom classifiers offer greater flexibility in designing experiments, though in 95% of cases, using the Huggingface wrapper should be enough.
 
 ```
 class severity_classifier(nn.Module):
@@ -151,7 +152,7 @@ trainer = Trainer(
 
 trainer.train()
 ```
-Alternatively, you can also create your own custom training function if you want more flexibility. Normally, the huggingface Trainer function is already very good for common use.
+Alternatively, you can also create your own custom training function if you want more flexibility. Normally, the huggingface Trainer function is already very good for most use cases.
 
 ```
 def train(model, train_dataloader, val_dataloader, Y_val, path):
